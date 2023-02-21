@@ -335,12 +335,12 @@ m_step3_fit <- mplusModeler(m_step3,
 
 ### Distal outcome mean differences
 
-![](figures/Distal_barplot.png){width="600"}
+![](figures/Distal_barplot.png)
 
 
 ### Latent class moderates effect of school `Lunch Program` (X) on `Reading` & `Math`assessments (Ys)
 
-![](figures/Simple_slopes.png){style="float: left;" width="600"}
+![](figures/Simple_slopes.png)
 
 - - -
 
