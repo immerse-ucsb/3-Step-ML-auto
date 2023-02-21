@@ -1,26 +1,26 @@
-# 3-Step-ML-auto
+## Video tutorial repository: "3-Step-ML-auto"
 
-# --------------------------------------------------------------------------------------
+- - -
 
-### title: "3-Step ML Auxiliary Variable Integration Using `MplusAutomation`"
+### 3-Step ML Auxiliary Variable Integration Using `MplusAutomation`
 
-### subtitle: "*Adding Covariate and Distal Outcome Variables to Mixture Models*"
+#### *Adding Covariate and Distal Outcome Variables to Mixture Models*
 
-### author: "IMMERSE Project: Adam Garber"
+#### IMMERSE Project: Adam Garber
 
-# --------------------------------------------------------------------------------------
+- - -
 
 ![](figures/IESNewLogo.jpg){style="float: left;" width="300"}
 
 The Institute of Mixture Modeling for Equity-Oriented Researchers, Scholars, and Educators (`IMMERSE`) is an IES funded training grant (R305B220021) to support education scholars in integrating mixture modeling into their research.
 
-Visit our [$\color{blue}{\text{Website}}$](https://immerse.education.ucsb.edu/) to learn more about the IMMERSE project.
+Visit our [Website](https://immerse.education.ucsb.edu/) to learn more about the IMMERSE project.
 
-Follow us on [$\color{blue}{\text{Twitter}}$](https://twitter.com/IMMERSE_UCSB) for updates on posted resources!
+Follow us on [Twitter](https://twitter.com/IMMERSE_UCSB) for updates on posted resources!
 
-Visit our [$\color{blue}{\text{GitHub}}$](https://github.com/immerse-ucsb/) account to follow along with this tutorial & others. 
+Visit our [GitHub](https://github.com/immerse-ucsb/) account to follow along with this tutorial & others. 
 
-# -------------------------------------------------------------------------------------- 
+- - -
 
 ## What is included in this video tutorial?
 
@@ -30,19 +30,19 @@ Visit our [$\color{blue}{\text{GitHub}}$](https://github.com/immerse-ucsb/) acco
 
 \newpage
 
-# --------------------------------------------------------------------------------------
+- - -
 
 **How to reference this tutorial:**
 
-Garber, A. C. (2021). 3-Step ML Auxiliary Variable Integration Using MplusAutomation. Retrieved from [$\color{blue}{\text{psyarxiv.com/phtxa}}$](https://psyarxiv.com/phtxa)
+Garber, A. C. (2021). 3-Step ML Auxiliary Variable Integration Using MplusAutomation. Retrieved from [psyarxiv.com/phtxa](https://psyarxiv.com/phtxa)
 
-# --------------------------------------------------------------------------------------
+- - -
 
 **Follow along! Link to `Github` repository:**
 
-$\color{blue}{\text{https://github.com/immerse-ucsb/3step-ML-auto}}$
+https://github.com/immerse-ucsb/3step-ML-auto
 
-# --------------------------------------------------------------------------------------
+- - -
 
 Load packages
 ```{r}
@@ -52,7 +52,7 @@ library(here)            # Location, location, location
 library(tidyverse)       # Tidyness
 ```
 
-# --------------------------------------------------------------------------------------
+- - -
 
 ### Data Source: Civil Rights Data Collection (CRDC)
 
@@ -62,7 +62,7 @@ library(tidyverse)       # Tidyness
 
 **Data access (`R`):** https://github.com/UrbanInstitute/education-data-package-r
 
-# --------------------------------------------------------------------------------------
+- - -
 
 Read in CSV data file from the `data` subfolder
 ```{r}
@@ -74,11 +74,11 @@ data_3step <- read_csv(here("data", "crdc_aux_data.csv"))
 
 \newpage
 
-# --------------------------------------------------------------------------------------
+- - -
 
 ## "Manual 3-Step" ML Auxiliary Variable Integration Method
 
-# --------------------------------------------------------------------------------------
+- - -
 
 
 ### Step 1 - Estimate the unconditional model with all covariate & distal outcome variables mentioned in the `auxiliary` statement.
@@ -126,7 +126,7 @@ m_step1_fit <- mplusModeler(m_step1,
                  check=TRUE, run = TRUE, hashfilename = FALSE)
 ```
 
-# --------------------------------------------------------------------------------------
+- - -
 
 ### Step 2 - Extract logits & saved data from the step 1 unconditional model.
 
@@ -194,13 +194,13 @@ m_step2_fit <- mplusModeler(m_step2,
                  check=TRUE, run = TRUE, hashfilename = FALSE)
 ```
 
-# --------------------------------------------------------------------------------------
+- - -
 
 ### Step 3 - Add covariates & distal outcomes to the model. 
 
 ##  Estimate the final SEM Model - Moderation Example
 
-# --------------------------------------------------------------------------------------
+- - -
 
 **Specification details:**
 
@@ -325,13 +325,13 @@ m_step3_fit <- mplusModeler(m_step3,
 
 **End of 3-Step Procedure**
 
-# --------------------------------------------------------------------------------------
+- - -
 
 ## Visualize results:
 
 > NOTE: The next video in this series will include a detailed tutorial on how to interpret auxiliary variable output (i.e. distal outcomes & covariates) in the context of moderation. This tutorial will also cover `R` code to generate figures for visualizing the results. 
 
-# --------------------------------------------------------------------------------------
+- - -
 
 ### Distal outcome mean differences
 
@@ -342,11 +342,11 @@ m_step3_fit <- mplusModeler(m_step3,
 
 ![](figures/Simple_slopes.png){style="float: left;" width="600"}
 
-# --------------------------------------------------------------------------------------
+- - -
 
 ## References
 
-# --------------------------------------------------------------------------------------
+- - -
 
 Asparouhov, T., & Muthén, B. O.
 (2014). 
@@ -388,5 +388,5 @@ Wickham et al., (2019).
 Welcome to the tidyverse.
 Journal of Open Source Software, 4(43), 1686, <https://doi.org/10.21105/joss.01686>
 
-# --------------------------------------------------------------------------------------
+- - -
 
