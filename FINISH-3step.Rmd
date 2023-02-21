@@ -1,24 +1,31 @@
-# 3-Step-ML-auto
+---
+title: "3-Step ML Auxiliary Variable Integration Using `MplusAutomation`"
+subtitle: "*Adding Covariate and Distal Outcome Variables to Mixture Models*"
+author: "IMMERSE Project: Adam Garber"
+date: '`r format(Sys.time(), "%B, %d,  %Y")`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE, eval=TRUE}
+knitr::opts_chunk$set(eval = FALSE, echo = TRUE, message = FALSE, warning = FALSE) 
+library(knitr)
+```
 
 # --------------------------------------------------------------------------------------
 
-### title: "3-Step ML Auxiliary Variable Integration Using `MplusAutomation`"
-
-### subtitle: "*Adding Covariate and Distal Outcome Variables to Mixture Models*"
-
-### author: "IMMERSE Project: Adam Garber"
-
-# --------------------------------------------------------------------------------------
-
-![](figures/IESNewLogo.jpg){style="float: left;" width="300"}
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="40%"}
+include_graphics("figures/IESNewLogo.jpg")
+```
 
 The Institute of Mixture Modeling for Equity-Oriented Researchers, Scholars, and Educators (`IMMERSE`) is an IES funded training grant (R305B220021) to support education scholars in integrating mixture modeling into their research.
 
-Visit our [$\color{blue}{\text{Website}}$](https://immerse.education.ucsb.edu/) to learn more about the IMMERSE project.
+> Visit our [$\color{blue}{\text{Website}}$](https://immerse.education.ucsb.edu/) to learn more about the IMMERSE project.
 
-Follow us on [$\color{blue}{\text{Twitter}}$](https://twitter.com/IMMERSE_UCSB) for updates on posted resources!
+> Follow us on [$\color{blue}{\text{Twitter}}$](https://twitter.com/IMMERSE_UCSB) for updates on posted resources!
 
-Visit our [$\color{blue}{\text{GitHub}}$](https://github.com/immerse-ucsb/) account to follow along with this tutorial & others. 
+> Visit our [$\color{blue}{\text{GitHub}}$](https://github.com/immerse-ucsb/) account to follow along with this tutorial & others. 
 
 # -------------------------------------------------------------------------------------- 
 
@@ -335,12 +342,15 @@ m_step3_fit <- mplusModeler(m_step3,
 
 ### Distal outcome mean differences
 
-![](figures/Distal_barplot.png){width="600"}
-
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="65%"}
+include_graphics("figures/Distal_barplot.png")
+```
 
 ### Latent class moderates effect of school `Lunch Program` (X) on `Reading` & `Math`assessments (Ys)
 
-![](figures/Simple_slopes.png){style="float: left;" width="600"}
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="65%"}
+include_graphics("figures/Simple_slopes.png")
+```
 
 # --------------------------------------------------------------------------------------
 
@@ -389,3 +399,4 @@ Welcome to the tidyverse.
 Journal of Open Source Software, 4(43), 1686, <https://doi.org/10.21105/joss.01686>
 
 # --------------------------------------------------------------------------------------
+

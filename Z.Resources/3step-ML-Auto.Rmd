@@ -1,24 +1,31 @@
-# 3-Step-ML-auto
+---
+title: "3-Step ML Auxiliary Variable Integration Using `MplusAutomation`"
+subtitle: "*Adding Covariate and Distal Outcome Variables to Mixture Models*"
+author: "IMMERSE Project: Adam Garber"
+date: '`r format(Sys.time(), "%B, %d,  %Y")`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE, eval=TRUE}
+knitr::opts_chunk$set(eval = FALSE, echo = TRUE, message = FALSE, warning = FALSE) 
+library(knitr)
+```
 
 # --------------------------------------------------------------------------------------
 
-### title: "3-Step ML Auxiliary Variable Integration Using `MplusAutomation`"
-
-### subtitle: "*Adding Covariate and Distal Outcome Variables to Mixture Models*"
-
-### author: "IMMERSE Project: Adam Garber"
-
-# --------------------------------------------------------------------------------------
-
-![](figures/IESNewLogo.jpg){style="float: left;" width="300"}
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="40%"}
+include_graphics("figures/IESNewLogo.jpg")
+```
 
 The Institute of Mixture Modeling for Equity-Oriented Researchers, Scholars, and Educators (`IMMERSE`) is an IES funded training grant (R305B220021) to support education scholars in integrating mixture modeling into their research.
 
-Visit our [$\color{blue}{\text{Website}}$](https://immerse.education.ucsb.edu/) to learn more about the IMMERSE project.
+> Visit our [$\color{blue}{\text{Website}}$](https://immerse.education.ucsb.edu/) to learn more about the IMMERSE project.
 
-Follow us on [$\color{blue}{\text{Twitter}}$](https://twitter.com/IMMERSE_UCSB) for updates on posted resources!
+> Follow us on [$\color{blue}{\text{Twitter}}$](https://twitter.com/IMMERSE_UCSB) for updates on posted resources!
 
-Visit our [$\color{blue}{\text{GitHub}}$](https://github.com/immerse-ucsb/) account to follow along with this tutorial & others. 
+> Visit our [$\color{blue}{\text{GitHub}}$](https://github.com/immerse-ucsb/) account to follow along with this tutorial & others. 
 
 # -------------------------------------------------------------------------------------- 
 
@@ -98,7 +105,7 @@ m_step1  <- mplusObject(
     
     !!! All auxiliary variables to be considered in the final model should be listed here !!!
     auxiliary = 
-    lunch_program read_test math_test;",
+    lunch_program title1_e title1_s read_test math_test;",
   
   ANALYSIS = 
    "estimator = mlr; 
@@ -326,21 +333,237 @@ m_step3_fit <- mplusModeler(m_step3,
 **End of 3-Step Procedure**
 
 # --------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 
-## Visualize results:
+### Estimate step 3 moderation model with covariate un-centered to produce simple-slopes plots 
 
-> NOTE: The next video in this series will include a detailed tutorial on how to interpret auxiliary variable output (i.e. distal outcomes & covariates) in the context of moderation. This tutorial will also cover `R` code to generate figures for visualizing the results. 
+- Intercepts is fixed at the first level of the covariate `SOC_STRS`
+
+**Note:** Here the `update()` function is used to take the previous model and remove the Mplus syntax within the `DEFINE` statement that was used to center the covariate `Social Stress`. Next, the updated model input syntax is used to estimate a new model. To learn more about the `update` function see the `MplusAutomation` tutorial article (https://www.tandfonline.com/doi/pdf/10.1080/10705511.2017.1402334).
+
+```{r}
+m_uncen <- update(m_step3,
+  DEFINE = ~" ") # This update removes the centering syntax from the model object `m_step3`
+
+m_uncen_fit <- mplusModeler(m_uncen,
+                            dataout=here("3step_mplus", "Step3_3step.dat"), 
+                            modelout=here("3step_mplus", "Step3_uncentered.inp"), 
+                            check=TRUE, run = TRUE, hashfilename = FALSE)
+```
 
 # --------------------------------------------------------------------------------------
 
-### Distal outcome mean differences
+## 1.8 Distal Outcome Plot
 
-![](figures/Distal_barplot.png){width="600"}
+# --------------------------------------------------------------------------------------
+
+**Note**: The distal outcome means are estimated with the binary covariate (`SOC_STRS`)  at the weighted average. This is specified by centering social stress as shown in the `Step-3` model syntax. 
+
+This syntax reads in the `Step3` model & extract model parameter estimates.
+```{r, eval=TRUE}
+model_step3 <- readModels(here("3step_mplus", "Step3_3step.out"), quiet = TRUE)
+  
+model_step3 <- data.frame(model_step3$parameters$unstandardized)
+
+```
+
+This syntax is used to create the `data-frame` that produces the distal outcome bar plot.
+```{r, eval=TRUE}
+
+distal_data <- model_step3 %>% 
+  filter(paramHeader == "Intercepts") %>% 
+  mutate(param = case_when(
+      param == "READ_TES" ~ "Reading Test",
+      param == "MATH_TES" ~ "Math Test")) %>% 
+  mutate(LatentClass = factor(LatentClass,
+      labels = c("Reported Harrasement (Low), Staff (High)",
+                 "Reported Harrasement (High), Staff (Low)",
+                 "Reported Harrasement (Low), Staff (Low)"))) %>% 
+  mutate(value_labels = c("36.4a", "36.3a", "44.5b", "42.8b", "44.9b", "43.4b"))
+  
+```
+
+## Plot distal outcomes grouped by class (*Figure 3*) 
+```{r, eval=TRUE}
+library(cowplot)
+library(reshape2) 
+
+ggplot(distal_data, 
+       aes(fill=LatentClass, y=est, x=fct_rev(param))) + 
+  geom_bar(position="dodge", stat="identity", color="black", size=.3) + 
+  geom_errorbar( aes(ymin=est-se, ymax=est+se),
+                 width=.2, position=position_dodge(.9)) +
+  geom_text(aes(y = est -4, label = value_labels),
+            family="Times New Roman", size=4,
+            position=position_dodge(.9)) +
+  #scale_fill_grey(start = 0.6, end = 1.0) +
+  theme_cowplot() +
+  labs(x = "", y = "Mean Value", fill = "Latent Class") +
+  theme(text=element_text(family="Times New Roman", size=12),
+        axis.text.x=element_text(size=10)) +
+        coord_cartesian(expand = FALSE)
+
+```
+
+```{r}
+ggsave(here("figures","Distal_barplot.png"), dpi=300, height=3, width=6, units="in")  
+```
 
 
-### Latent class moderates effect of school `Lunch Program` (X) on `Reading` & `Math`assessments (Ys)
+# --------------------------------------------------------------------------------------
 
-![](figures/Simple_slopes.png){style="float: left;" width="600"}
+## 1.9 Simple Slope Plots
+
+**Note:** The un-centered distal intercepts represent the conditional means when the binary covariate is at its first level `SOC_STRS = 0` (i.e., no social stress). Therefore, the conditional mean for `SOC_STRS = 1`  (i.e., social stress) can be calculated by adding the associated slope coefficient to the intercept. 
+
+# --------------------------------------------------------------------------------------
+
+Read in the un-centered model & extract relevant parameters
+```{r, eval=TRUE}
+model_uncen <- readModels(here("3step_mplus", "Step3_uncentered.out"), quiet = TRUE)
+  
+model_uncen <- data.frame(model_uncen$parameters$unstandardized)
+
+slope_data <- model_uncen %>% 
+  filter(str_detect(paramHeader, 'ON|Inter'))%>% 
+  unite("param", paramHeader:param, remove = TRUE) %>% 
+  mutate(param = str_replace(param, "TES.ON_LUNCH_PR", "COEF")) %>% 
+  mutate(param = str_remove_all(param, "Intercepts_|_TES")) %>% 
+  mutate(LatentClass = factor(LatentClass,
+    labels = c("Rep. Harrasement (Low), Staff (High)",
+                 "Rep. Harrasement (High), Staff (Low)",
+                 "Rep. Harrasement (Low), Staff (Low)")))
+
+```
+
+# --------------------------------------------------------------------------------------
+
+## Reading test simple slope graph
+
+# --------------------------------------------------------------------------------------
+
+Prepare `data-frame` for plotting
+```{r, eval=TRUE}
+
+read_data <- slope_data %>% 
+  filter(str_detect(param, 'READ')) 
+
+read_wide <- read_data %>%
+  select(param,est, LatentClass) %>% 
+  pivot_wider(names_from = param, values_from = est) %>% 
+  rename("No.Lunch.Program" = 'READ') %>% 
+  mutate(Lunch.Program = No.Lunch.Program + READ_COEF) %>% # calc. condit. means `LUNCH_PR = 1`
+  select(-READ_COEF)
+
+read_pos <- melt(read_wide, id.vars = "LatentClass") %>% 
+  mutate(variable = factor(variable,
+                      levels = c("No.Lunch.Program","Lunch.Program"),
+                      labels = c("No Lunch Program","Lunch Program")))
+
+```
+
+Plot positive mood simple slope graph
+```{r, eval=TRUE}
+p_plot <- ggplot(read_pos,
+            aes(y=value, x=variable,
+                color=LatentClass,
+                group=LatentClass,
+                shape=LatentClass,
+                lty=LatentClass)) + 
+  geom_point(size = 4) + geom_line() + 
+  xlab("") + ylab("Reading Test Assessment")  +
+  #ylim(0,100)+
+  #scale_colour_grey() +
+  theme_classic() + 
+  theme(text=element_text(family="Times New Roman", size=12), 
+        axis.text.x=element_text(size=12),
+        legend.text = element_text(family="Times New Roman", size=8),
+        legend.position = "top", legend.title = element_blank()) 
+      #annotate(geom = "text",
+      #     x = 1.8, y = 2.77,
+      #     label = "N.S.", color = "black") + 
+      #annotate(geom = "text",
+      #     x = 1.8, y = 2.60,
+      #     label = "N.S.", color = "black")
+
+p_plot
+```
+
+
+```{r}
+ggsave(here("figures", "Read_simple_slopes.png"), dpi=300, height=4, width=6, units="in")
+```
+
+# --------------------------------------------------------------------------------------
+
+## Negative mood simple slope graph 
+
+# --------------------------------------------------------------------------------------
+
+Prepare `data-frame` for plotting
+```{r, eval=TRUE}
+
+math_data <- slope_data %>% 
+  filter(str_detect(param, 'MATH')) 
+
+math_wide <- math_data %>%
+  select(param,est, LatentClass) %>% 
+  pivot_wider(names_from = param, values_from = est) %>% 
+  rename("No.Lunch.Program" = 'MATH') %>% 
+  mutate(Lunch.Program = No.Lunch.Program + MATH_COEF) %>%   # calculate means for `Lunch.Program = 1`
+  select(-MATH_COEF)
+
+plot_math <- melt(math_wide, id.vars = "LatentClass") %>% 
+  mutate(variable = factor(variable,
+                      levels = c("No.Lunch.Program","Lunch.Program"),
+                      labels = c("No Lunch Program","Lunch Program")))
+
+```
+
+Plot negative mood simple slope graph
+```{r, eval=TRUE}
+n_plot <- ggplot(plot_math,
+            aes(y=value, x=variable,
+            color=LatentClass,
+            group=LatentClass,
+            shape=LatentClass,
+            lty=LatentClass)) + 
+  geom_point(size=4) + geom_line() + 
+  xlab("") + ylab("Math Test Assessment") + 
+  #ylim(1.5,3)+
+  #scale_colour_grey() + 
+  theme_classic() +
+  theme(text=element_text(family="Times New Roman", color = "black", size=12),
+        axis.text.x=element_text(size=12),
+        legend.text = element_text(family="Times New Roman", size=8),
+        legend.position = "top", legend.title = element_blank()) 
+    #annotate(geom = "text",
+    #   x = 1.8, y = 1.6,
+    #   label = "N.S.", color = "black")
+
+n_plot
+```
+
+```{r}
+ggsave(here("figures", "Math_simple_slopes.png"), dpi=300, height=4, width=6, units="in")
+```
+
+# --------------------------------------------------------------------------------------
+
+## Combine the two simple slopes graphs for distal outcomes positive & negative mood (*Figure 4*)
+
+```{r, eval=TRUE, fig.width = 6.5, fig.height = 8.5}
+
+library(patchwork)
+
+p_plot / n_plot # combines plots using the {patchwork} package
+
+```
+
+```{r}
+ggsave(here("figures", "Simple_slopes.png"), dpi=300, height=8.5, width=6.5, units="in")
+```
 
 # --------------------------------------------------------------------------------------
 
@@ -389,3 +612,4 @@ Welcome to the tidyverse.
 Journal of Open Source Software, 4(43), 1686, <https://doi.org/10.21105/joss.01686>
 
 # --------------------------------------------------------------------------------------
+

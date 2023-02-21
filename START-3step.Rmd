@@ -1,24 +1,31 @@
-# 3-Step-ML-auto
+---
+title: "3-Step ML Auxiliary Variable Integration Using `MplusAutomation`"
+subtitle: "*Adding Covariate and Distal Outcome Variables to Mixture Models*"
+author: "IMMERSE Project: Adam Garber"
+date: '`r format(Sys.time(), "%B, %d,  %Y")`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE, eval=TRUE}
+knitr::opts_chunk$set(eval = FALSE, echo = TRUE, message = FALSE, warning = FALSE) 
+library(knitr)
+```
 
 # --------------------------------------------------------------------------------------
 
-### title: "3-Step ML Auxiliary Variable Integration Using `MplusAutomation`"
-
-### subtitle: "*Adding Covariate and Distal Outcome Variables to Mixture Models*"
-
-### author: "IMMERSE Project: Adam Garber"
-
-# --------------------------------------------------------------------------------------
-
-![](figures/IESNewLogo.jpg){style="float: left;" width="300"}
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="40%"}
+include_graphics("figures/IESNewLogo.jpg")
+```
 
 The Institute of Mixture Modeling for Equity-Oriented Researchers, Scholars, and Educators (`IMMERSE`) is an IES funded training grant (R305B220021) to support education scholars in integrating mixture modeling into their research.
 
-Visit our [$\color{blue}{\text{Website}}$](https://immerse.education.ucsb.edu/) to learn more about the IMMERSE project.
+> Visit our [$\color{blue}{\text{Website}}$](https://immerse.education.ucsb.edu/) to learn more about the IMMERSE project.
 
-Follow us on [$\color{blue}{\text{Twitter}}$](https://twitter.com/IMMERSE_UCSB) for updates on posted resources!
+> Follow us on [$\color{blue}{\text{Twitter}}$](https://twitter.com/IMMERSE_UCSB) for updates on posted resources!
 
-Visit our [$\color{blue}{\text{GitHub}}$](https://github.com/immerse-ucsb/) account to follow along with this tutorial & others. 
+> Visit our [$\color{blue}{\text{GitHub}}$](https://github.com/immerse-ucsb/) account to follow along with this tutorial & others. 
 
 # -------------------------------------------------------------------------------------- 
 
@@ -67,7 +74,7 @@ library(tidyverse)       # Tidyness
 Read in CSV data file from the `data` subfolder
 ```{r}
 
-data_3step <- read_csv(here("data", "crdc_aux_data.csv"))
+data_3step <- read_csv(here("", ".csv"))
 
 ```
 
@@ -90,15 +97,14 @@ data_3step <- read_csv(here("data", "crdc_aux_data.csv"))
 m_step1  <- mplusObject(
   TITLE = "Step1  (MANUAL 3-STEP ML APPROACH)", 
   VARIABLE = 
-   "categorical = report_dis report_race report_sex counselors_fte psych_fte law_fte; 
+   "categorical = ; 
    
-    usevar = report_dis report_race report_sex counselors_fte psych_fte law_fte;
+    usevar = ;
     
-    classes = c(3); 
+    classes = c(); 
     
     !!! All auxiliary variables to be considered in the final model should be listed here !!!
-    auxiliary = 
-    lunch_program read_test math_test;",
+    auxiliary = lunch_program read_test math_test;",
   
   ANALYSIS = 
    "estimator = mlr; 
@@ -113,16 +119,12 @@ m_step1  <- mplusObject(
     Save=cprob;
     Missflag= 999;",
   
-  PLOT = 
-    "type = plot3; 
-    series = report_dis report_race report_sex counselors_fte psych_fte law_fte(*);",
-  
   usevariables = colnames(data_3step),
   rdata = data_3step)
 
 m_step1_fit <- mplusModeler(m_step1,
-                 dataout=here("3step_mplus", "Step1_3step.dat"),
-                 modelout=here("3step_mplus", "Step1_3step.inp") ,
+                 dataout=here("", ".dat"),
+                 modelout=here("", ".inp") ,
                  check=TRUE, run = TRUE, hashfilename = FALSE)
 ```
 
@@ -152,7 +154,7 @@ colnames(savedata)[colnames(savedata)=="C"] <- "N"
 
 ```
 
-### Step 2 (part 2) - Estimate the unconditional model with logits from step 2. 
+### Step 2 (part 2) - Estimate the unconditional model with logits from step 1. 
 
 This model is estimated to check that the class proportions are approximately the same as in step 1. 
 ```{r}
@@ -310,9 +312,7 @@ m_step3  <- mplusObject(
   !s1=s2;      !!! Slope difference omnibus Wald test `math_tes on lunch_pr` !!!
   !s2=s3;
 
-
- 
- ",
+",
  
   usevariables = colnames(savedata), 
   rdata = savedata)
@@ -335,12 +335,15 @@ m_step3_fit <- mplusModeler(m_step3,
 
 ### Distal outcome mean differences
 
-![](figures/Distal_barplot.png){width="600"}
-
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="65%"}
+include_graphics("figures/Distal_barplot.png")
+```
 
 ### Latent class moderates effect of school `Lunch Program` (X) on `Reading` & `Math`assessments (Ys)
 
-![](figures/Simple_slopes.png){style="float: left;" width="600"}
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="65%"}
+include_graphics("figures/Simple_slopes.png")
+```
 
 # --------------------------------------------------------------------------------------
 
