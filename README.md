@@ -63,7 +63,7 @@ library(gt)              # Tables
 
 **Data access (`R`):** https://github.com/UrbanInstitute/education-data-package-r
 
-
+![](figures/Variables_table.png)
 
 - - -
 
@@ -199,9 +199,9 @@ m_step2_fit <- mplusModeler(m_step2,
 
 - - -
 
-### Step 3 - Add covariates & distal outcomes to the model. 
+### Step 3 - Moderation Example: Add covariates & distal outcomes to the model. 
 
-##  Estimate the final SEM Model - Moderation Example
+![](figures/Moderation_Path_Diagram.png)
 
 - - -
 
