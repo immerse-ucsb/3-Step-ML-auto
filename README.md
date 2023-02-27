@@ -50,6 +50,7 @@ library(MplusAutomation) # Conduit between R & Mplus
 library(glue)            # Pasting R code into strings
 library(here)            # Location, location, location
 library(tidyverse)       # Tidyness
+library(gt)              # Tables
 ```
 
 - - -
@@ -61,6 +62,8 @@ library(tidyverse)       # Tidyness
 **Information about CRCD:** https://www2.ed.gov/about/offices/list/ocr/data.html
 
 **Data access (`R`):** https://github.com/UrbanInstitute/education-data-package-r
+
+
 
 - - -
 

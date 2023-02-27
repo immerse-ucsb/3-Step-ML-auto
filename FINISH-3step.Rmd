@@ -35,14 +35,6 @@ The Institute of Mixture Modeling for Equity-Oriented Researchers, Scholars, and
 
 > The motivation for this tutorial is that conducting the 3-step manually is highly error prone as it requires pulling logit values estimated in the step-1 model and adding them in the model statement of the step-2 model (i.e., lots of copying & pasting). In contrast, this approach is fully replicable and provides clear documentation which translates to more reliable research. Also, it saves time!
 
-\newpage
-
-# --------------------------------------------------------------------------------------
-
-**How to reference this tutorial:**
-
-Garber, A. C. (2021). 3-Step ML Auxiliary Variable Integration Using MplusAutomation. Retrieved from [$\color{blue}{\text{psyarxiv.com/phtxa}}$](https://psyarxiv.com/phtxa)
-
 # --------------------------------------------------------------------------------------
 
 **Follow along! Link to `Github` repository:**
@@ -52,7 +44,7 @@ $\color{blue}{\text{https://github.com/immerse-ucsb/3step-ML-auto}}$
 # --------------------------------------------------------------------------------------
 
 Load packages
-```{r}
+```{r, eval=TRUE}
 library(MplusAutomation) # Conduit between R & Mplus
 library(glue)            # Pasting R code into strings
 library(here)            # Location, location, location
@@ -69,17 +61,16 @@ library(tidyverse)       # Tidyness
 
 **Data access (`R`):** https://github.com/UrbanInstitute/education-data-package-r
 
-# --------------------------------------------------------------------------------------
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="100%"}
+include_graphics("figures/Variables_table.png")
+```
+
+\newpage
 
 Read in CSV data file from the `data` subfolder
 ```{r}
-
 data_3step <- read_csv(here("data", "crdc_aux_data.csv"))
-
 ```
-
-
-\newpage
 
 # --------------------------------------------------------------------------------------
 
@@ -87,11 +78,9 @@ data_3step <- read_csv(here("data", "crdc_aux_data.csv"))
 
 # --------------------------------------------------------------------------------------
 
-
 ### Step 1 - Estimate the unconditional model with all covariate & distal outcome variables mentioned in the `auxiliary` statement.
 
-**NOTE**: In this example, Mplus input and output files are directed to the sub-folder `3step_mplus`. Due to the fact that adding auxiliary variables is conducted after enumeration, generally other sub-folders will exist in the top-most `Rproject` folder such as `enum_mplus`, `data`, and `figures`.
-
+**NOTE**: In this example, Mplus input and output files are directed to the sub-folder `3step_mplus`. 
 ```{r}
 
 m_step1  <- mplusObject(
@@ -104,8 +93,7 @@ m_step1  <- mplusObject(
     classes = c(3); 
     
     !!! All auxiliary variables to be considered in the final model should be listed here !!!
-    auxiliary = 
-    lunch_program read_test math_test;",
+    auxiliary = lunch_program read_test math_test;",
   
   ANALYSIS = 
    "estimator = mlr; 
@@ -122,7 +110,7 @@ m_step1  <- mplusObject(
   
   PLOT = 
     "type = plot3; 
-    series = report_dis report_race report_sex counselors_fte psych_fte law_fte(*);",
+     series = report_dis report_race report_sex counselors_fte psych_fte law_fte(*);",
   
   usevariables = colnames(data_3step),
   rdata = data_3step)
@@ -158,6 +146,8 @@ Rename the column in savedata for "C" and change to "N"
 colnames(savedata)[colnames(savedata)=="C"] <- "N"
 
 ```
+
+# --------------------------------------------------------------------------------------
 
 ### Step 2 (part 2) - Estimate the unconditional model with logits from step 2. 
 
@@ -203,9 +193,11 @@ m_step2_fit <- mplusModeler(m_step2,
 
 # --------------------------------------------------------------------------------------
 
-### Step 3 - Add covariates & distal outcomes to the model. 
+### Step 3 - Moderation Example: Add covariates & distal outcomes to the model. 
 
-##  Estimate the final SEM Model - Moderation Example
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="80%"}
+include_graphics("figures/Moderation_Path_Diagram.png")
+```
 
 # --------------------------------------------------------------------------------------
 
@@ -237,10 +229,9 @@ m_step3  <- mplusObject(
   type = mixture; 
   starts = 0;",
   
-  MODEL =
-  glue(
- "!!! OUTCOMES = read_tes math_tes !!! 
-  !!! MODERATOR = lunch_pr !!! 
+  MODEL = glue(
+ "!!! DISTAL OUTCOMES = read_tes math_tes !!!
+  !!! COVARIATE = lunch_pr !!!
   
   %OVERALL%
   read_tes on lunch_pr;
@@ -253,8 +244,8 @@ m_step3  <- mplusObject(
   [n#1@{logit_cprobs[1,1]}];
   [n#2@{logit_cprobs[1,2]}];
   
-  [read_tes](m01);
-  read_tes;                    !!! estimate conditional intercept !!!
+  [read_tes](m01);               !!! estimate conditional intercept mean !!!
+  read_tes;                      !!! estimate conditional intercept variance !!!
   read_tes on lunch_pr (s01);    !!! estimate conditional regression !!!
 
   [math_tes] (m1);
@@ -286,10 +277,9 @@ m_step3  <- mplusObject(
   math_tes on lunch_pr (s3);"),
   
   MODELCONSTRAINT = 
- "New (diff12 diff13
-  diff23 slope12 slope13
-  slope23 ndiff12 ndiff13
-  ndiff23 nslope12 nslope13
+ "New (diff12 diff13 diff23 
+  slope12 slope13 slope23 ndiff12
+  ndiff13 ndiff23 nslope12 nslope13
   nslope23);
 
   diff12 = m1-m2;   ndiff12 = m01-m02;
@@ -300,9 +290,8 @@ m_step3  <- mplusObject(
   slope23 = s2-s3;  nslope23 = s02-s03;",
   
   MODELTEST =
-  ## NOTE: Only a single Wald test can be conducted per model run. Therefore, 
-  ## this example requires running separate models for each omnibus test (e.g.,
-  ## 4 models; 2 outcomes and 2 slope coefficients). This can be done by
+  ## NOTE: Only a single Wald test can be conducted per model run. Therefore, this example
+  ## requires running separate models for each omnibus test. This can be done by
   ## commenting out all but one test and then estimating multiple versions of the model.
    
  "!m01=m02;    !!! Distal outcome omnibus Wald test for `read_tes` !!!
@@ -315,11 +304,7 @@ m_step3  <- mplusObject(
   m2=m3;       
 
   !s1=s2;      !!! Slope difference omnibus Wald test `math_tes on lunch_pr` !!!
-  !s2=s3;
-
-
- 
- ",
+  !s2=s3; ",
  
   usevariables = colnames(savedata), 
   rdata = savedata)
@@ -342,7 +327,7 @@ m_step3_fit <- mplusModeler(m_step3,
 
 ### Distal outcome mean differences
 
-```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="65%"}
+```{r, echo=FALSE, eval=TRUE, fig.align='center', out.width="85%"}
 include_graphics("figures/Distal_barplot.png")
 ```
 
@@ -355,6 +340,12 @@ include_graphics("figures/Simple_slopes.png")
 # --------------------------------------------------------------------------------------
 
 ## References
+
+**How to reference this tutorial:**
+
+Garber, A. C. (2021). 
+3-Step ML Auxiliary Variable Integration Using MplusAutomation. 
+Retrieved from [$\color{blue}{\text{psyarxiv.com/phtxa}}$](https://psyarxiv.com/phtxa)
 
 # --------------------------------------------------------------------------------------
 
